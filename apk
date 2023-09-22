@@ -1,0 +1,4 @@
+#!/bin/sh
+ARCH="`uname -m`"
+apk-init "$ARCH"
+"apk-$ARCH" "$@"

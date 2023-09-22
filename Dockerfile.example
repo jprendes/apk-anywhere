@@ -1,0 +1,15 @@
+FROM ubuntu:22.04
+
+COPY --from=jorgeprendes420/apk-anywhere / /
+
+# install aarch64 packages in /apk-aarch64
+# use symlinks:
+#   /apk-aarch64/usr/lib     -> /systoor/lib
+#   /apk-aarch64/usr/include -> /systoor/include
+RUN apk-init aarch64 /sysroot && \
+    apk-aarch64 add libseccomp-static libseccomp-dev
+
+# install host arch packages in /apk-`uname -m`
+# creates symlink:
+#   /apk -> /apk-`uname -m`
+RUN apk add libseccomp-static libseccomp-dev

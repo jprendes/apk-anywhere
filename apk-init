@@ -15,11 +15,17 @@ fi
 
 LOADER=`find /alpine/lib/ -name ld-musl-*`
 
-mkdir -p "$ROOT/etc/apk"
-mkdir -p "$ROOT/etc/apk/keys"
-mkdir -p "$ROOT/etc/apk/protected_paths.d"
+mkdir -p "$ROOT/etc/apk" "$ROOT/etc/apk/keys" "$ROOT/etc/apk/protected_paths.d"
 echo "$ARCH" > "$ROOT/etc/apk/arch"
 cp /alpine/etc/apk/repositories "$ROOT/etc/apk/"
+
+if ! [ -z "$SYSROOT" ]; then
+    mkdir -p "$SYSROOT/lib" "$SYSROOT/include" "$ROOT/usr"
+    ln -s "$SYSROOT/lib" "$ROOT/usr/lib"
+    ln -s "$SYSROOT/lib" "$ROOT/lib"
+    ln -s "$SYSROOT/include" "$ROOT/usr/include"
+fi
+
 LD_LIBRARY_PATH="/alpine/lib/" "$LOADER" -- /alpine/sbin/apk add --no-cache --initdb -p "$ROOT" --allow-untrusted alpine-keys
 
 cat <<EOT > "/usr/local/bin/apk-$ARCH" && chmod a+x "/usr/local/bin/apk-$ARCH"
@@ -29,10 +35,4 @@ EOT
 
 if [ "$ARCH" = "`uname -m`" ]; then
     ln -s "$ROOT" "/apk"
-fi
-
-if ! [ -z "$SYSROOT" ]; then
-    mkdir -p "$SYSROOT/lib" "$SYSROOT/include"
-    ln -s "$SYSROOT/lib" "$ROOT/usr/lib"
-    ln -s "$SYSROOT/include" "$ROOT/usr/include"
 fi
